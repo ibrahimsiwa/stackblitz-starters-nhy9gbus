@@ -58,11 +58,11 @@ export default function Cashier2({
   }
 
   function completeSale() {
-    if (cart.length === 0) return alert('Cart is empty');
+    if (cart.length === 0) return alert('السلة فارغة');
 
     const total = cart.reduce((sum, item) => sum + item.price * item.count, 0);
 
-    const defaultCustomer = customers[0] || { name: 'Quick Customer', phone: '', points: 0 };
+    const defaultCustomer = customers[0] || { name: 'عميل سريع', phone: '', points: 0 };
 
     setCustomers(prev => [
       {
@@ -73,32 +73,13 @@ export default function Cashier2({
     ]);
 
     setCart([]);
-    alert('Sale completed');
+    alert('تم البيع بنجاح');
   }
 
   function sendSaleViaWhatsApp() {
-    if (cart.length === 0) return alert('Cart is empty');
-  
+    if (cart.length === 0) return alert('السلة فارغة');
     const total = cart.reduce((sum, item) => sum + item.price * item.count, 0);
-  
-    const message = 'Ibn Shali - New order, Total: ' + total + ' EGP, Thank you';
-  
-    const whatsappUrl = 'https://wa.me/201094241177?text=' + encodeURIComponent(message);
-    window.open(whatsappUrl, '_blank');
-  }
-    if (cart.length === 0) return alert('Cart is empty');
-
-    const total = cart.reduce((sum, item) => sum + item.price * item.count, 0);
-
-    // نص بسيط بالإنجليزي، كل سطر في 
-
-    const message =
-      'Ibn Shali - New order
-' +
-      'Total: ' + total + ' EGP
-' +
-      'Thank you';
-
+    const message = 'ابن شالي - اوردر جديد، المجموع: ' + total + ' ج.م، شكراً لزيارتكم';
     const whatsappUrl = 'https://wa.me/201094241177?text=' + encodeURIComponent(message);
     window.open(whatsappUrl, '_blank');
   }
@@ -113,7 +94,7 @@ export default function Cashier2({
       id: expenses.length + 1,
       category: newExpense.category,
       amount,
-      source: 'From cash wallet',
+      source: 'من محفظة كاش',
       date: new Date().toISOString().split('T')[0]
     };
 
@@ -138,19 +119,19 @@ export default function Cashier2({
   return (
     <div className="min-h-screen bg-[#f5f2eb] p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-black text-[#1e6b65]">Cashier (j2)</h1>
+        <h1 className="text-2xl font-black text-[#1e6b65]">واجهة الكاشير</h1>
         <button
           onClick={() => setRole(null)}
           className="bg-[#3d2e24] text-white px-4 py-2 rounded-lg text-sm font-bold"
         >
-          Back
+          رجوع
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Products */}
+        {/* المنتجات */}
         <div>
-          <h2 className="font-bold text-lg mb-4 text-[#3d2e24]">Products</h2>
+          <h2 className="font-bold text-lg mb-4 text-[#3d2e24]">المنتجات المتاحة</h2>
           <div className="grid grid-cols-2 gap-4">
             {products.map(p => (
               <button
@@ -159,18 +140,18 @@ export default function Cashier2({
                 className="bg-white p-4 rounded-xl shadow-sm border border-[#3d2e24]/10 text-left"
               >
                 <h3 className="font-bold text-[#3d2e24] text-sm">{p.name}</h3>
-                <p className="text-[#1e6b65] font-bold text-sm">{p.price} EGP</p>
+                <p className="text-[#1e6b65] font-bold text-sm">{p.price} ج.م</p>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Cart */}
+        {/* السلة */}
         <div>
-          <h2 className="font-bold text-lg mb-4 text-[#3d2e24]">Cart</h2>
+          <h2 className="font-bold text-lg mb-4 text-[#3d2e24]">سلة المبيعات</h2>
           <div className="bg-white p-4 rounded-xl shadow-sm border border-[#3d2e24]/10">
             {cart.length === 0 ? (
-              <p className="text-gray-500">Cart is empty</p>
+              <p className="text-gray-500">السلة فارغة</p>
             ) : (
               <>
                 <ul>
@@ -187,7 +168,7 @@ export default function Cashier2({
                         >
                           −
                         </button>
-                        <span className="font-bold">{item.price * item.count} EGP</span>
+                        <span className="font-bold">{item.price * item.count} ج.م</span>
                         <button
                           onClick={() => addToCart({ id: item.id, name: item.name, price: item.price })}
                           className="text-green-500 text-sm"
@@ -200,9 +181,9 @@ export default function Cashier2({
                 </ul>
 
                 <div className="flex justify-between font-bold text-lg mt-4">
-                  <span>Total</span>
+                  <span>المجموع</span>
                   <span className="text-[#1e6b65]">
-                    {cart.reduce((sum, item) => sum + item.price * item.count, 0)} EGP
+                    {cart.reduce((sum, item) => sum + item.price * item.count, 0)} ج.م
                   </span>
                 </div>
 
@@ -211,13 +192,13 @@ export default function Cashier2({
                     onClick={completeSale}
                     className="bg-[#1e6b65] text-white px-4 py-2 rounded-lg text-sm font-bold"
                   >
-                    Complete Sale
+                    إتمام البيع
                   </button>
                   <button
                     onClick={sendSaleViaWhatsApp}
                     className="bg-[#3d2e24] text-white px-4 py-2 rounded-lg text-sm font-bold"
                   >
-                    Send WhatsApp
+                    إرسال WhatsApp
                   </button>
                 </div>
               </>
@@ -225,21 +206,21 @@ export default function Cashier2({
           </div>
         </div>
 
-        {/* Expenses & Customers */}
+        {/* المصروفات والعملاء */}
         <div>
-          <h2 className="font-bold text-lg mb-4 text-[#3d2e24]">Expenses</h2>
+          <h2 className="font-bold text-lg mb-4 text-[#3d2e24]">المصروفات</h2>
           <div className="bg-white p-4 rounded-xl shadow-sm border border-[#3d2e24]/10 mb-6">
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
-                placeholder="Category"
+                placeholder="الفئة"
                 className="border rounded-lg p-2 w-full text-sm"
                 value={newExpense.category}
                 onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value })}
               />
               <input
                 type="number"
-                placeholder="Amount"
+                placeholder="المبلغ"
                 className="border rounded-lg p-2 w-full text-sm"
                 value={newExpense.amount}
                 onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
@@ -249,32 +230,32 @@ export default function Cashier2({
               onClick={addExpense}
               className="bg-[#1e6b65] text-white px-4 py-2 rounded-lg text-sm font-bold"
             >
-              Add Expense
+              إضافة مصروف
             </button>
 
             <ul className="mt-4">
               {expenses.map(exp => (
                 <li key={exp.id} className="flex justify-between py-2 border-b">
                   <span>{exp.category}</span>
-                  <span className="font-bold text-[#1e6b65]">{exp.amount} EGP</span>
+                  <span className="font-bold text-[#1e6b65]">{exp.amount} ج.م</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <h2 className="font-bold text-lg mb-4 text-[#3d2e24]">Customers</h2>
+          <h2 className="font-bold text-lg mb-4 text-[#3d2e24]">العملاء</h2>
           <div className="bg-white p-4 rounded-xl shadow-sm border border-[#3d2e24]/10 mb-6">
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
-                placeholder="Name"
+                placeholder="الاسم"
                 className="border rounded-lg p-2 w-full text-sm"
                 value={newCustomer.name}
                 onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
               />
               <input
                 type="text"
-                placeholder="Phone"
+                placeholder="الرقم"
                 className="border rounded-lg p-2 w-full text-sm"
                 value={newCustomer.phone}
                 onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
@@ -284,7 +265,7 @@ export default function Cashier2({
               onClick={addCustomer}
               className="bg-[#1e6b65] text-white px-4 py-2 rounded-lg text-sm font-bold"
             >
-              Add Customer
+              إضافة عميل
             </button>
 
             <ul className="mt-4">
@@ -292,7 +273,7 @@ export default function Cashier2({
                 <li key={c.id || c.phone} className="py-2 border-b">
                   <span className="font-bold text-[#3d2e24]">{c.name}</span>
                   <span className="text-gray-500 block">{c.phone}</span>
-                  <span className="text-sm text-[#1e6b65]">Points: {c.points}</span>
+                  <span className="text-sm text-[#1e6b65]">نقاط: {c.points}</span>
                 </li>
               ))}
             </ul>
