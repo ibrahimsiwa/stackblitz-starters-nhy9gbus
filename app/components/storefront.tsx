@@ -1,7 +1,6 @@
 "use client";
 
-import { Product, Role } from "../page";
-
+import { Product, Role } from "@/app/page";
 interface StorefrontProps {
   products: Product[];
   setRole: (role: Role) => void;
