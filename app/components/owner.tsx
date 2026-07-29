@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { BarChart3, Package, Users, Upload, Database, Mail, AlertTriangle, Check } from 'lucide-react';
+import React from 'react';
+import { Upload, Database, Mail } from 'lucide-react';
 
 interface OwnerProps {
   products: any[];
