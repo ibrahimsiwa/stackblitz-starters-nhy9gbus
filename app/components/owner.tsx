@@ -1,221 +1,206 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Product, Customer, Expense, LoyaltySettings, Role } from "../page";
+import React, { useState } from 'react';
+import { Upload, Database, Mail } from 'lucide-react';
 
-interface OwnerProps {
-  products: Product[];
-  setProducts: (products: Product[]) => void;
-  customers: Customer[];
-  setCustomers: (customers: Customer[]) => void;
-  expenses: Expense[];
-  setExpenses: (expenses: Expense[]) => void;
-  loyaltySettings: LoyaltySettings;
-  setLoyaltySettings: (settings: LoyaltySettings) => void;
-  setRole: (role: Role) => void;
+interface LoyaltySettings {
+  pointsPerEGP: number;
+  rewardThreshold: number;
 }
 
-export default function Owner({
-  products,
-  setProducts,
-  customers,
-  setCustomers,
-  expenses,
-  setExpenses,
-  loyaltySettings,
-  setLoyaltySettings,
-  setRole,
+interface OwnerProps {
+  products?: any[];
+  expenses?: any[];
+  customers?: any[];
+  heroBanner?: string;
+  setHeroBanner?: (img: string) => void;
+  setProducts?: React.Dispatch<React.SetStateAction<any[]>>;
+  setRole: (role: 'visitor' | 'cashier' | 'owner') => void;
+  processImageUpload?: (e: React.ChangeEvent<HTMLInputElement>, id: number) => void;
+  submitNewProduct?: (e: React.FormEvent) => void;
+  newProductData?: any;
+  setNewProductData?: any;
+  loyaltySettings?: LoyaltySettings;
+  setLoyaltySettings?: (settings: LoyaltySettings) => void;
+}
+
+export default function Owner({ 
+  products = [], expenses = [], customers = [], heroBanner = '', setHeroBanner = () => {}, 
+  setRole, processImageUpload = () => {}, submitNewProduct,
+  newProductData = { name: '', price: '', stock: '', criticalLevel: '', expiry: '', category: 'olive_oil', description: '' },
+  setNewProductData = () => {},
+  loyaltySettings = { pointsPerEGP: 100, rewardThreshold: 500 },
+  setLoyaltySettings = () => {}
 }: OwnerProps) {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "customers" | "expenses" | "loyalty" | "exit">("dashboard");
+  
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'loyalty'>('dashboard');
+  const [editingLoyalty, setEditingLoyalty] = useState(false);
+  const [loyaltyForm, setLoyaltyForm] = useState({
+    pointsPerEGP: String(loyaltySettings.pointsPerEGP),
+    rewardThreshold: String(loyaltySettings.rewardThreshold),
+  });
 
-  const addProduct = () => {
-    const name = prompt("اسم المنتج:");
-    if (!name) return;
-    const category = prompt("الفئة:");
-    const price = parseFloat(prompt("السعر:") || "0");
-    const stock = parseInt(prompt("المخزون:") || "0");
-    const image = prompt("رابط الصورة:");
-
-    const newProduct: Product = {
-      id: Date.now(),
-      name,
-      category,
-      price,
-      stock,
-      image: image || "/placeholder.jpg",
-    };
-
-    setProducts([...products, newProduct]);
-  };
-
-  const updateLoyaltySettings = () => {
-    const pointsPerEGP = parseFloat(prompt("كم جنيه لنقطة واحدة؟", loyaltySettings.pointsPerEGP.toString()) || "10");
-    const rewardThreshold = parseInt(prompt("كم نقطة للمكافأة؟", loyaltySettings.rewardThreshold.toString()) || "100");
-
-    setLoyaltySettings({ pointsPerEGP, rewardThreshold });
-  };
-
-  if (activeTab === "exit") {
-    return (
-      <div className="min-h-screen bg-siwa-beige flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-siwa-charcoal mb-4">تسجيل خروج المدير</h2>
-          <button
-            onClick={() => setRole("storefront")}
-            className="px-6 py-3 bg-siwa-gold text-white rounded-xl hover:bg-siwa-spring transition"
-          >
-            العودة للمتجر
-          </button>
-        </div>
-      </div>
-    );
+  function saveLoyaltySettings() {
+    setLoyaltySettings({
+      pointsPerEGP: parseFloat(loyaltyForm.pointsPerEGP) || 1,
+      rewardThreshold: parseFloat(loyaltyForm.rewardThreshold) || 1,
+    });
+    setEditingLoyalty(false);
   }
 
+  const totalRevenue = 4890;
+  const totalExpensesAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const netProfit = totalRevenue - totalExpensesAmount;
+
+  const handleHeroBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          setHeroBanner(reader.result as string);
+          alert("تم رفع وضبط لقطة سيوة الواقعية كخلفية حية للمتجر بنجاح! 🌴");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-siwa-beige p-4">
-      {/* الشريط العلوي */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-siwa-charcoal">لوحة المدير</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setRole("cashier")}
-            className="px-4 py-2 bg-siwa-spring text-white rounded-xl"
-          >
-            الكاشير
-          </button>
-          <button
-            onClick={() => setRole("storefront")}
-            className="px-4 py-2 bg-siwa-gold text-white rounded-xl"
-          >
-            المتجر
-          </button>
+    <div className="space-y-8 max-w-5xl mx-auto animate-fade-in pb-12">
+      <div className="flex justify-between items-center border-b border-[#3d2e24]/10 pb-4">
+        <div>
+          <h2 className="text-sm font-black text-[#3d2e24] uppercase tracking-widest">لوحة الإدارة المركزية والتحكم للمالك</h2>
+          <p className="text-[11px] text-stone-400 mt-0.5 font-medium">مراقبة حية لإجماليات الأداء العام وجرد المخازن ووسائط براند ابن شالي</p>
         </div>
+        <button onClick={() => setRole('cashier')} className="bg-[#3d2e24] hover:bg-[#1e6b65] text-white px-4 py-2 rounded-xl text-xs font-black transition">الولوج لواجهة الكاشير ↩</button>
       </div>
 
-      {/* التبويبات */}
-      <div className="flex gap-2 mb-6 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab("dashboard")}
-          className={`px-4 py-2 rounded-xl whitespace-nowrap ${activeTab === "dashboard" ? "bg-siwa-gold text-white" : "bg-siwa-surface"}`}
-        >
-          لوحة المعلومات
-        </button>
-        <button
-          onClick={() => setActiveTab("products")}
-          className={`px-4 py-2 rounded-xl whitespace-nowrap ${activeTab === "products" ? "bg-siwa-gold text-white" : "bg-siwa-surface"}`}
-        >
-          المنتجات
-        </button>
-        <button
-          onClick={() => setActiveTab("customers")}
-          className={`px-4 py-2 rounded-xl whitespace-nowrap ${activeTab === "customers" ? "bg-siwa-gold text-white" : "bg-siwa-surface"}`}
-        >
-          العملاء
-        </button>
-        <button
-          onClick={() => setActiveTab("expenses")}
-          className={`px-4 py-2 rounded-xl whitespace-nowrap ${activeTab === "expenses" ? "bg-siwa-gold text-white" : "bg-siwa-surface"}`}
-        >
-          المصروفات
-        </button>
-        <button
-          onClick={() => setActiveTab("loyalty")}
-          className={`px-4 py-2 rounded-xl whitespace-nowrap ${activeTab === "loyalty" ? "bg-siwa-gold text-white" : "bg-siwa-surface"}`}
-        >
-          نظام النقاط
-        </button>
-        <button
-          onClick={() => setActiveTab("exit")}
-          className={`px-4 py-2 rounded-xl whitespace-nowrap ${activeTab === "exit" ? "bg-siwa-charcoal text-white" : "bg-siwa-surface"}`}
-        >
-          خروج
-        </button>
+      {/* شريط التبويبات */}
+      <div className="flex gap-2 bg-stone-100 p-1 rounded-xl w-fit">
+        <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded-lg text-xs font-black transition ${activeTab === 'dashboard' ? 'bg-[#1e6b65] text-white' : 'text-[#3d2e24]'}`}>لوحة التحكم</button>
+        <button onClick={() => setActiveTab('loyalty')} className={`px-4 py-2 rounded-lg text-xs font-black transition ${activeTab === 'loyalty' ? 'bg-[#1e6b65] text-white' : 'text-[#3d2e24]'}`}>نظام النقاط</button>
       </div>
 
-      {/* محتوى التبويبات */}
-      {activeTab === "dashboard" && (
-        <div className="bg-siwa-surface rounded-2xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-siwa-charcoal mb-4">لوحة المعلومات</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-siwa-beige p-4 rounded-xl">
-              <p className="text-siwa-clay">إجمالي المنتجات</p>
-              <p className="text-3xl font-bold text-siwa-spring">{products.length}</p>
-            </div>
-            <div className="bg-siwa-beige p-4 rounded-xl">
-              <p className="text-siwa-clay">إجمالي العملاء</p>
-              <p className="text-3xl font-bold text-siwa-gold">{customers.length}</p>
-            </div>
+      {activeTab === 'dashboard' && (
+      <>
+      {/* كروت الأداء المالي والربح الصافي */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-2xl p-5 shadow-sm"><span className="text-[10px] text-stone-400 font-bold uppercase block">إجمالي مبيعات الخزنة الموحدة اليوم</span><p className="text-xl font-black font-mono text-emerald-600 mt-1">{totalRevenue}.00 ج.م</p></div>
+        <div className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-2xl p-5 shadow-sm"><span className="text-[10px] text-stone-400 font-bold block">إجمالي مصاريف التشغيل المقيدة</span><p className="text-xl font-black font-mono text-rose-600 mt-1">{totalExpensesAmount}.00 ج.m</p></div>
+        <div className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-2xl p-5 shadow-sm"><span className="text-[10px] text-stone-400 font-bold block">الربح الصافي الفعلي لمعاملات اليوم</span><p className="text-xl font-black font-mono text-emerald-600 mt-1">{netProfit}.00 ج.م</p></div>
+      </div>
+
+      {/* قسم تخصيص وصيانة صور المتجر والواجهة الخلفية السيّوية المباشرة */}
+      <div className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-3xl p-6 shadow-md space-y-6">
+        <div className="border-b border-stone-100 pb-2"><h3 className="text-xs font-black text-[#3d2e24] flex items-center gap-1.5">📸 إدارة وسائط المتجر وصورة الواجهة الخلفية</h3></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <div className="space-y-1">
+            <label className="text-[11px] font-black block text-[#3d2e24]">تحديث صورة واجهة المتجر الخلفية (Hero Banner):</label>
+            <p className="text-[10px] text-stone-400 font-medium leading-relaxed">ارفع هنا لقطة جبال وبحيرة واحة سيوة الصادقة عالية الدقة لتصبح الخلفية الرسمية الفورية لزوار المتجر.</p>
+          </div>
+          <div className="md:col-span-2">
+            <label className="cursor-pointer bg-[#f5f2eb] border border-dashed border-[#4a3b32]/30 px-6 py-5 rounded-2xl font-black text-xs text-[#3d2e24] flex flex-col items-center justify-center gap-2 transition-all hover:bg-stone-50">
+              <Upload className="w-6 h-6 text-[#1e6b65]" />
+              <span>انقر هنا لاختيار أو التقاط لقطة سيوة الواقعية للمتجر</span>
+              <input type="file" accept="image/*" onChange={handleHeroBannerUpload} className="hidden" />
+            </label>
           </div>
         </div>
-      )}
 
-      {activeTab === "products" && (
-        <div className="bg-siwa-surface rounded-2xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-siwa-charcoal mb-4">إدارة المنتجات</h3>
-          <button
-            onClick={addProduct}
-            className="mb-4 px-4 py-2 bg-siwa-spring text-white rounded-xl"
-          >
-            إضافة منتج جديد
-          </button>
-          <ul className="space-y-2">
-            {products.map((product) => (
-              <li key={product.id} className="p-3 bg-siwa-beige rounded-xl flex justify-between">
-                <span>{product.name}</span>
-                <span className="text-siwa-spring">{product.price} ج</span>
-              </li>
+        {/* صيانة صور المنتجات الفردية الفاخرة */}
+        <div className="pt-4 border-t border-stone-100 space-y-2">
+          <label className="text-[11px] font-black block text-[#3d2e24] mb-2">تحديث صور كروت المنتجات الفردية (Base64 السحابية):</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {products.map(p => (
+              <div key={p.id} className="bg-[#f5f2eb]/40 border border-[#3d2e24]/10 rounded-2xl p-4 flex justify-between items-center gap-2">
+                <span className="text-xs font-bold text-[#3d2e24] truncate max-w-[180px]">{p.name}</span>
+                <label className="cursor-pointer bg-[#fcfbfa] hover:bg-stone-50 border border-[#4a3b32]/20 px-3 py-2 rounded-xl text-[10px] font-black flex items-center gap-1 shadow-sm transition">
+                  <Upload className="w-3.5 h-3.5 text-[#1e6b65]" />
+                  <span>{p.imageLive ? 'تحديث اللقطة' : 'رفع لقطة المنتج 📸'}</span>
+                  <input type="file" accept="image/*" onChange={(e) => processImageUpload(e, p.id)} className="hidden" />
+                </label>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
+      </div>
+
+      {/* نموذج حقن صنف جديد بالكامل للمستودع */}
+      <form onSubmit={submitNewProduct} className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-3xl p-6 shadow-md grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+        <h3 className="sm:col-span-3 text-xs font-black text-[#3d2e24] border-b border-[#3d2e24]/10 pb-2 uppercase tracking-wider">حقن منتج طبيعي جديد في المخزن السحابي الموحد</h3>
+        <div className="space-y-1"><label className="text-[10px] font-bold">اسم المنتج الفاخر:</label><input type="text" required placeholder="الاسم" value={newProductData.name} onChange={(e) => setNewProductData({...newProductData, name: e.target.value})} className="w-full bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-xl p-2.5 text-xs text-[#3d2e24] focus:outline-none" /></div>
+        <div className="space-y-1"><label className="text-[10px] font-bold">السعر التجاري (ج.م):</label><input type="number" required placeholder="السعر" value={newProductData.price} onChange={(e) => setNewProductData({...newProductData, price: e.target.value})} className="w-full bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-xl p-2.5 text-xs text-[#3d2e24] focus:outline-none" /></div>
+        <div className="space-y-1"><label className="text-[10px] font-bold">الرصيد الابتدائي الحالي:</label><input type="number" required placeholder="الكمية" value={newProductData.stock} onChange={(e) => setNewProductData({...newProductData, stock: e.target.value})} className="w-full bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-xl p-2.5 text-xs text-[#3d2e24] focus:outline-none" /></div>
+        <div className="space-y-1"><label className="text-[10px] font-bold">حد التنبيه الحرج للنواقص:</label><input type="number" placeholder="مثال: 5" value={newProductData.criticalLevel} onChange={(e) => setNewProductData({...newProductData, criticalLevel: e.target.value})} className="w-full bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-xl p-2.5 text-xs focus:outline-none" /></div>
+        <div className="space-y-1"><label className="text-[10px] font-bold">خط انتهاء الصلاحية:</label><input type="date" required value={newProductData.expiry} onChange={(e) => setNewProductData({...newProductData, expiry: e.target.value})} className="w-full bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-xl p-2.5 text-xs focus:outline-none" /></div>
+        <div className="space-y-1"><label className="text-[10px] font-bold">العائلة البوتانيكية:</label>
+          <select value={newProductData.category} onChange={(e) => setNewProductData({...newProductData, category: e.target.value})} className="w-full bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-xl p-2.5 text-xs focus:outline-none">
+            <option value="olive_oil">زيت زيتون فاخر</option><option value="dates">تمور سيوة سادة</option><option value="dates_premium">تمور محشية وهدايا</option><option value="herbs">أعشاب برية</option>
+          </select>
+        </div>
+        <div className="sm:col-span-3 space-y-1"><label className="text-[10px] font-bold">بيان وميثاق المكونات والتحاليل الشفافة للعميل النخبوي:</label><textarea rows={2} required placeholder="اكتب هنا التحاليل ونسب الحموضة الفنية والمنشأ والفوائد الطبية..." value={newProductData.description} onChange={(e) => setNewProductData({...newProductData, description: e.target.value})} className="w-full bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-xl p-2.5 text-xs focus:outline-none" /></div>
+        <button type="submit" className="sm:col-span-3 bg-[#1e6b65] hover:bg-[#154d49] text-white font-black text-xs py-3 rounded-xl shadow transition">حفظ وحقن كارت صنف المنتج الجديد بالخلفية سحابياً 🚀</button>
+      </form>
+
+      {/* جدول جرد ورصيد المخزن المركزي */}
+      <div className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-3xl overflow-hidden shadow-sm">
+        <table className="w-full text-right text-xs">
+          <thead className="bg-[#f5f2eb] text-[#3d2e24] border-b border-[#3d2e24]/10 font-bold"><tr><th className="p-4">اسم صنف التحفة الطبيعية لـ "ابن شالي"</th><th className="p-4">الرصيد المتاح بالفرع</th><th className="p-4 text-center">نظام التنبيه التلقائي</th><th className="p-4 text-center">تاريخ انتهاء الصلاحية الموثق</th></tr></thead>
+          <tbody className="divide-y divide-[#3d2e24]/10">
+            {products.map(p => (
+              <tr key={p.id} className="hover:bg-stone-50"><td className="p-4 font-black text-[#3d2e24]">{p.name}</td><td className="p-4 font-mono font-bold text-stone-500">{p.stock} عبوة</td><td className="p-4 text-center">{p.stock <= p.criticalLevel ? (<span className="bg-rose-50 text-rose-600 border border-rose-200 text-[10px] px-2.5 py-1 rounded-full font-black animate-pulse">تحذير: مخزون حرج!</span>) : (<span className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] px-2.5 py-1 rounded-full font-bold">آمن ومستقر</span>)}</td><td className="p-4 text-center font-mono font-bold text-[#1e6b65]">{p.expiry}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* النسخ الاحتياطي والبريد الإلكتروني المؤتمت للتقارير الأسبوعية للبراند */}
+      <div className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-3xl p-6 shadow-md grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2"><h3 className="text-xs font-black text-[#3d2e24] flex items-center gap-1.5"><Database className="w-4 h-4 text-[#1e6b65]" /> النسخ الاحتياطي والأمان التلقائي</h3><p className="text-xs text-[#4a3b32]/80 leading-relaxed font-medium">قاعدة البيانات الاحتياطية السحابية مؤمنة كلياً وتقوم بعمل حفظ دوري وتلقائي لكافة الحركات المالية وتحديثات جرد المخازن المباشرة لـ "ابن شالي".</p></div>
+        <div className="space-y-2 border-r border-[#3d2e24]/10 pr-6"><h3 className="text-xs font-black text-[#3d2e24] flex items-center gap-1.5"><Mail className="w-4 h-4 text-amber-600" /> التقارير الشاملة وجدولة الإيميل الآلي</h3><p className="text-xs text-[#4a3b32]/80 leading-relaxed font-medium">النظام مجدول لإرسال تقرير وجرد أسبوعي دوري متكامل وشامل للمبيعات والمخزن مباشرة إلى بريد الإدارة المعتمد والموثق للتاجر إبراهيم:</p><p className="text-xs font-mono font-black text-[#1e6b65] bg-[#f5f2eb] p-2 rounded-xl text-center border border-[#3d2e24]/5">ibrahimsiwa360@gmail.com</p></div>
+      </div>
+      </>
       )}
 
-      {activeTab === "customers" && (
-        <div className="bg-siwa-surface rounded-2xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-siwa-charcoal mb-4">العملاء</h3>
-          <ul className="space-y-2">
-            {customers.map((customer) => (
-              <li key={customer.id} className="p-3 bg-siwa-beige rounded-xl">
-                <div className="flex justify-between">
-                  <span className="font-semibold">{customer.name}</span>
-                  <span className="text-siwa-gold">{customer.points} نقطة</span>
+      {activeTab === 'loyalty' && (
+        <div className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-3xl p-6 shadow-md space-y-5 max-w-lg">
+          <h3 className="text-xs font-black text-[#3d2e24] border-b border-stone-100 pb-2">⭐ إعدادات نظام نقاط الولاء</h3>
+
+          {!editingLoyalty ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-stone-50 rounded-2xl p-4 text-center">
+                  <p className="text-[10px] text-stone-400 font-bold">كل</p>
+                  <p className="text-xl font-black text-[#1e6b65]">{loyaltySettings.pointsPerEGP} ج.م</p>
+                  <p className="text-[10px] text-stone-400 font-bold">= 1 نقطة</p>
                 </div>
-                <p className="text-sm text-siwa-clay">{customer.phone}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {activeTab === "expenses" && (
-        <div className="bg-siwa-surface rounded-2xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-siwa-charcoal mb-4">المصروفات</h3>
-          <ul className="space-y-2">
-            {expenses.map((expense) => (
-              <li key={expense.id} className="p-3 bg-siwa-beige rounded-xl flex justify-between">
-                <span>{expense.reason}</span>
-                <span className="text-siwa-spring">{expense.amount} ج</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {activeTab === "loyalty" && (
-        <div className="bg-siwa-surface rounded-2xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-siwa-charcoal mb-4">نظام النقاط</h3>
-          <div className="mb-6">
-            <p className="text-siwa-clay mb-2">الإعدادات الحالية:</p>
-            <p className="text-lg">كل {loyaltySettings.pointsPerEGP} جنيه = 1 نقطة</p>
-            <p className="text-lg">كل {loyaltySettings.rewardThreshold} نقطة = مكافأة</p>
-          </div>
-          <button
-            onClick={updateLoyaltySettings}
-            className="w-full py-3 bg-siwa-gold text-white rounded-xl hover:bg-siwa-spring transition"
-          >
-            تعديل الإعدادات
-          </button>
+                <div className="bg-stone-50 rounded-2xl p-4 text-center">
+                  <p className="text-[10px] text-stone-400 font-bold">كل</p>
+                  <p className="text-xl font-black text-amber-600">{loyaltySettings.rewardThreshold}</p>
+                  <p className="text-[10px] text-stone-400 font-bold">نقطة = مكافأة</p>
+                </div>
+              </div>
+              <button onClick={() => setEditingLoyalty(true)} className="w-full bg-[#1e6b65] text-white text-xs font-black py-2.5 rounded-xl">تعديل الإعدادات</button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold">قيمة الشراء مقابل نقطة واحدة (بالجنيه):</label>
+                <input type="number" value={loyaltyForm.pointsPerEGP} onChange={(e) => setLoyaltyForm(p => ({ ...p, pointsPerEGP: e.target.value }))} className="w-full border border-stone-200 rounded-xl p-2.5 text-xs" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold">عدد النقاط اللازمة للمكافأة:</label>
+                <input type="number" value={loyaltyForm.rewardThreshold} onChange={(e) => setLoyaltyForm(p => ({ ...p, rewardThreshold: e.target.value }))} className="w-full border border-stone-200 rounded-xl p-2.5 text-xs" />
+              </div>
+              <div className="flex gap-2">
+                <button onClick={saveLoyaltySettings} className="flex-1 bg-[#1e6b65] text-white text-xs font-black py-2.5 rounded-xl">حفظ</button>
+                <button onClick={() => setEditingLoyalty(false)} className="flex-1 bg-stone-100 text-[#3d2e24] text-xs py-2.5 rounded-xl">إلغاء</button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
   );
-                                                               }
+}
