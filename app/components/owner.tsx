@@ -4,22 +4,24 @@ import React from 'react';
 import { Upload, Database, Mail } from 'lucide-react';
 
 interface OwnerProps {
-  products: any[];
-  expenses: any[];
-  customers: any[];
-  heroBanner: string;
-  setHeroBanner: (img: string) => void;
-  setProducts: React.Dispatch<React.SetStateAction<any[]>>;
+  products?: any[];
+  expenses?: any[];
+  customers?: any[];
+  heroBanner?: string;
+  setHeroBanner?: (img: string) => void;
+  setProducts?: React.Dispatch<React.SetStateAction<any[]>>;
   setRole: (role: 'visitor' | 'cashier' | 'owner') => void;
-  processImageUpload: (e: React.ChangeEvent<HTMLInputElement>, id: number) => void;
-  submitNewProduct: (e: React.FormEvent) => void;
-  newProductData: any;
-  setNewProductData: any;
+  processImageUpload?: (e: React.ChangeEvent<HTMLInputElement>, id: number) => void;
+  submitNewProduct?: (e: React.FormEvent) => void;
+  newProductData?: any;
+  setNewProductData?: any;
 }
 
 export default function Owner({ 
-  products, expenses, customers, heroBanner, setHeroBanner, 
-  setRole, processImageUpload, submitNewProduct, newProductData, setNewProductData 
+  products = [], expenses = [], customers = [], heroBanner = '', setHeroBanner = () => {}, 
+  setRole, processImageUpload = () => {}, submitNewProduct,
+  newProductData = { name: '', price: '', stock: '', criticalLevel: '', expiry: '', category: 'olive_oil', description: '' },
+  setNewProductData = () => {}
 }: OwnerProps) {
   
   const totalRevenue = 4890;
