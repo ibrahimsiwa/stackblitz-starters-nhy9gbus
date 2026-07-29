@@ -4,19 +4,18 @@ import React, { useState } from 'react';
 import { ShoppingCart, Eye, X, Lock, Package } from 'lucide-react';
 
 interface StorefrontProps {
-  products: any[];
+  products?: any[];
   setRole: (role: 'visitor' | 'cashier' | 'owner') => void;
-  heroBanner: string;
+  heroBanner?: string;
 }
 
-export default function Storefront({ products, setRole, heroBanner }: StorefrontProps) {
+export default function Storefront({ products = [], setRole, heroBanner = '' }: StorefrontProps) {
   const [visitorCart, setVisitorCart] = useState<any>({});
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [showVisitorCartModal, setShowVisitorCartModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
 
-  // إجماليات سلة المشتريات للزائر
   const visitorSubtotal = Object.values(visitorCart).reduce((s: number, i: any) => s + (i.price * i.quantity), 0);
   const totalItemsCount = Object.values(visitorCart).reduce((s: number, i: any) => s + i.quantity, 0);
 
@@ -36,7 +35,6 @@ export default function Storefront({ products, setRole, heroBanner }: Storefront
     });
   };
 
-  // تجميع الطلبات وإرسالها دفعة واحدة بالواتساب إلى رقمك المعتمد
   const handleSendWhatsAppOrder = () => {
     let itemsLines = '';
     Object.values(visitorCart).forEach((i: any) => {
@@ -49,7 +47,6 @@ export default function Storefront({ products, setRole, heroBanner }: Storefront
     setShowVisitorCartModal(false);
   };
 
-  // جدار حماية بوابة الإدارة بالرمز السري الجديد المعتمد
   const handleVerifyAccess = () => {
     if (passwordInput === "325748619") {
       setRole('cashier');
@@ -62,14 +59,11 @@ export default function Storefront({ products, setRole, heroBanner }: Storefront
 
   return (
     <div className="min-h-screen bg-[#f5f2eb] text-[#3d2e24] font-sans antialiased selection:bg-[#1e6b65]/10 selection:text-[#1e6b65]">
-      
-      {/* هيدر الشعار المـُحرر المنساب بوقار ونقاء الـ v0 */}
       <header className="py-12 text-center bg-[#fcfbfa]/90 backdrop-blur-sm border-b border-[#3d2e24]/5 sticky top-0 z-30 shadow-sm">
         <h1 className="text-4xl md:text-5xl font-black tracking-widest text-[#3d2e24] font-serif">ابن شالي</h1>
         <p className="text-[10px] uppercase tracking-widest text-[#1e6b65] font-black mt-1.5 tracking-wider">IBN SHALI • خلاصة الود</p>
       </header>
 
-      {/* مشهد البانر السيوي الواقعي */}
       <section className="relative h-80 md:h-[400px] w-full bg-[#3d2e24]/5 overflow-hidden flex items-center justify-center border-b border-[#3d2e24]/5">
         {heroBanner ? (
           <img src={heroBanner} alt="واحة سيوة الطبيعية" className="w-full h-full object-cover" />
@@ -81,7 +75,6 @@ export default function Storefront({ products, setRole, heroBanner }: Storefront
         )}
       </section>
 
-      {/* معرض كروت المنتجات المجرّدة الصافية */}
       <main className="max-w-6xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {products.map((p) => (
@@ -112,7 +105,6 @@ export default function Storefront({ products, setRole, heroBanner }: Storefront
         </div>
       </main>
 
-      {/* أيقونة وعربة مبيعات الزائر العائمة الفخمة */}
       {totalItemsCount > 0 && (
         <button onClick={() => setShowVisitorCartModal(true)} className="fixed bottom-8 left-8 bg-[#1e6b65] text-white p-4.5 rounded-full shadow-2xl flex items-center gap-2 animate-bounce z-40 border border-[#1e6b65]/20">
           <ShoppingCart className="w-5 h-5" />
@@ -121,7 +113,6 @@ export default function Storefront({ products, setRole, heroBanner }: Storefront
         </button>
       )}
 
-      {/* فوتر البوابة السرية لرمز التحقق */}
       <footer className="bg-[#fcfbfa] border-t border-[#3d2e24]/5 py-12 text-center text-xs text-[#4a3b32]/50 space-y-2">
         <p className="font-medium tracking-wide">ابن شالي — خلاصة الود © 2026</p>
         <button onClick={() => setShowAuthModal(true)} className="text-[9px] text-stone-400 font-black tracking-widest uppercase block mx-auto pt-2 border-t border-stone-100 w-36 hover:text-[#1e6b65] transition-colors">
@@ -129,7 +120,6 @@ export default function Storefront({ products, setRole, heroBanner }: Storefront
         </button>
       </footer>
 
-      {/* نافذة استعراض تفاصيل المنتج والتوثيق المجهري الفخم بنظام الكتل الثلاث الصارم */}
       {selectedProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3d2e24]/70 backdrop-blur-md p-4 animate-fade-in">
           <div className="bg-[#fcfbfa] border border-[#3d2e24]/20 rounded-3xl p-6 max-w-4xl w-full relative shadow-2xl space-y-6">
@@ -167,7 +157,6 @@ export default function Storefront({ products, setRole, heroBanner }: Storefront
         </div>
       )}
 
-      {/* نافذة باقة طلبات السلة الموحدة للزائر */}
       {showVisitorCartModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3d2e24]/70 backdrop-blur-md p-4">
           <div className="w-full max-w-sm rounded-3xl border border-[#3d2e24]/10 bg-[#fcfbfa] p-6 space-y-4 shadow-2xl relative">
@@ -198,7 +187,6 @@ export default function Storefront({ products, setRole, heroBanner }: Storefront
         </div>
       )}
 
-      {/* نافذة جدار حماية الولوج ببوابة المدير */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3d2e24]/60 backdrop-blur-sm p-4">
           <div className="bg-[#fcfbfa] border border-[#3d2e24]/20 rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
