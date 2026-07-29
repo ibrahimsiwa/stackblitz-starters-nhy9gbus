@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Storefront from './components/storefront';
 import Cashier2 from './components/cashier2'; // ← ده الجديد
-import Login from './components/login';
 import Owner from './components/owner';
 
 type Role = 'visitor' | 'cashier' | 'owner' | null;
