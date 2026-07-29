@@ -1,122 +1,118 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Storefront from './components/storefront';
-import Cashier2 from './components/cashier2'; // ← ده الجديد
-import Owner from './components/owner';
+import { useState, useEffect } from "react";
+import Storefront from "./components/storefront";
+import Owner from "./components/owner";
+import Cashier2 from "./components/cashier2";
 
-type Role = 'visitor' | 'cashier' | 'owner' | null;
+export type Role = "storefront" | "owner" | "cashier";
+
+export type Product = {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  image: string;
+  acidity?: string;
+  description?: string;
+};
+
+export type Customer = {
+  id: number;
+  name: string;
+  phone: string;
+  points: number;
+  totalPurchases: number;
+};
+
+export type CartItem = {
+  product: Product;
+  quantity: number;
+};
+
+export type Expense = {
+  id: number;
+  amount: number;
+  reason: string;
+  date: string;
+};
+
+export type LoyaltySettings = {
+  pointsPerEGP: number;
+  rewardThreshold: number;
+};
 
 export default function Home() {
-  // مؤقت: ناخدين state محلي للـ cart/clients/expenses جوه الصفحة
-  const [cart, setCart] = useState<{ id: number; name: string; price: number; count: number }[]>([]);
-  const [products, setProducts] = useState<any[]>([
-    { id: 1, name: 'منتج 1', price: 10 },
-    { id: 2, name: 'منتج 2', price: 15 },
-    { id: 3, name: 'منتج 3', price: 20 },
-  ]);
-  const [expenses, setExpenses] = useState<any[]>([]);
-  const [customers, setCustomers] = useState<any[]>([
-    { id: 1, name: 'عميل 1', phone: '01000000000', points: 0 },
-  ]);
-  const [heroBanner, setHeroBanner] = useState<string>('');
-  const [newProductData, setNewProductData] = useState<any>({
-    name: '', price: '', stock: '', criticalLevel: '', expiry: '', category: 'olive_oil', description: ''
+  const [role, setRole] = useState<Role>("storefront");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loyaltySettings, setLoyaltySettings] = useState<LoyaltySettings>({
+    pointsPerEGP: 10,
+    rewardThreshold: 100,
   });
 
-  const [role, setRole] = useState<Role>(null);
+  useEffect(() => {
+    const savedProducts = localStorage.getItem("ibnShali_products");
+    const savedCustomers = localStorage.getItem("ibnShali_customers");
+    const savedExpenses = localStorage.getItem("ibnShali_expenses");
+    const savedLoyalty = localStorage.getItem("ibnShali_loyalty");
 
-  function processImageUpload(e: React.ChangeEvent<HTMLInputElement>, id: number) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (reader.result) {
-        setProducts((prev: any[]) => prev.map(p => p.id === id ? { ...p, imageLive: reader.result } : p));
-      }
-    };
-    reader.readAsDataURL(file);
-  }
+    if (savedProducts) setProducts(JSON.parse(savedProducts));
+    if (savedCustomers) setCustomers(JSON.parse(savedCustomers));
+    if (savedExpenses) setExpenses(JSON.parse(savedExpenses));
+    if (savedLoyalty) setLoyaltySettings(JSON.parse(savedLoyalty));
+  }, []);
 
-  function submitNewProduct(e: React.FormEvent) {
-    e.preventDefault();
-    setProducts((prev: any[]) => [
-      ...prev,
-      {
-        id: prev.length + 1,
-        name: newProductData.name,
-        price: parseFloat(newProductData.price) || 0,
-        stock: parseInt(newProductData.stock) || 0,
-        criticalLevel: parseInt(newProductData.criticalLevel) || 0,
-        expiry: newProductData.expiry,
-        category: newProductData.category,
-        description: newProductData.description,
-      }
-    ]);
-    setNewProductData({ name: '', price: '', stock: '', criticalLevel: '', expiry: '', category: 'olive_oil', description: '' });
-  }
+  useEffect(() => {
+    localStorage.setItem("ibnShali_products", JSON.stringify(products));
+  }, [products]);
 
-  if (role === 'cashier') {
-    return (
-      <Cashier2
-        setRole={setRole}
-        cart={cart}
-        setCart={setCart}
-        products={products}
-        expenses={expenses}
-        setExpenses={setExpenses}
-        customers={customers}
-        setCustomers={setCustomers}
-      />
-    );
-  }
+  useEffect(() => {
+    localStorage.setItem("ibnShali_customers", JSON.stringify(customers));
+  }, [customers]);
 
-  if (role === 'owner') {
-    return (
-      <Owner
-        setRole={setRole}
-        products={products}
-        expenses={expenses}
-        customers={customers}
-        heroBanner={heroBanner}
-        setHeroBanner={setHeroBanner}
-        setProducts={setProducts}
-        processImageUpload={processImageUpload}
-        submitNewProduct={submitNewProduct}
-        newProductData={newProductData}
-        setNewProductData={setNewProductData}
-      />
-    );
-  }
+  useEffect(() => {
+    localStorage.setItem("ibnShali_expenses", JSON.stringify(expenses));
+  }, [expenses]);
 
-  if (role === 'visitor') {
-    return <Storefront setRole={setRole} />;
-  }
+  useEffect(() => {
+    localStorage.setItem("ibnShali_loyalty", JSON.stringify(loyaltySettings));
+  }, [loyaltySettings]);
 
   return (
-    <div className="min-h-screen bg-[#f5f2eb] flex flex-col items-center justify-center gap-6 p-6">
-      <h1 className="text-3xl font-black text-[#1e6b65]">ابن شالي</h1>
-
-      <button
-        onClick={() => setRole('visitor')}
-        className="bg-[#1e6b65] text-white px-8 py-4 rounded-xl font-bold text-lg"
-      >
-        المتجر
-      </button>
-
-      <button
-        onClick={() => setRole('cashier')}
-        className="bg-[#3d2e24] text-white px-8 py-4 rounded-xl font-bold text-lg"
-      >
-        الكاشير
-      </button>
-
-      <button
-        onClick={() => setRole('owner')}
-        className="bg-[#8b5a2b] text-white px-8 py-4 rounded-xl font-bold text-lg"
-      >
-        الإدارة
-      </button>
-    </div>
+    <main className="min-h-screen bg-siwa-beige">
+      {role === "storefront" && (
+        <Storefront
+          products={products}
+          setRole={setRole}
+        />
+      )}
+      {role === "owner" && (
+        <Owner
+          products={products}
+          setProducts={setProducts}
+          customers={customers}
+          setCustomers={setCustomers}
+          expenses={expenses}
+          setExpenses={setExpenses}
+          loyaltySettings={loyaltySettings}
+          setLoyaltySettings={setLoyaltySettings}
+          setRole={setRole}
+        />
+      )}
+      {role === "cashier" && (
+        <Cashier2
+          products={products}
+          customers={customers}
+          setCustomers={setCustomers}
+          expenses={expenses}
+          setExpenses={setExpenses}
+          loyaltySettings={loyaltySettings}
+          setRole={setRole}
+        />
+      )}
+    </main>
   );
 }
