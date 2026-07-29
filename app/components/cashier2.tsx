@@ -72,7 +72,7 @@ export default function Cashier2({
     const total = cart.reduce((sum, item) => sum + item.price * item.count, 0);
     const defaultCustomer = customers[0] || { name: 'Quick Customer', phone: '', points: 0 };
 
-    setCustomers(prev => [
+    setCustomers((prev: any[]) => [
       {
         ...defaultCustomer,
         points: (defaultCustomer.points || 0) + total
@@ -114,7 +114,7 @@ export default function Cashier2({
       date: new Date().toISOString().split('T')[0]
     };
 
-    setExpenses(prev => [...prev, expense]);
+    setExpenses((prev: any[]) => [...prev, expense]);
     setNewExpense({ category: '', amount: '' });
   }
 
@@ -128,7 +128,7 @@ export default function Cashier2({
       points: 0
     };
 
-    setCustomers(prev => [...prev, customer]);
+    setCustomers((prev: any[]) => [...prev, customer]);
     setNewCustomer({ name: '', phone: '' });
   }
 
@@ -184,9 +184,7 @@ export default function Cashier2({
                         </button>
                         <span className="font-bold">{item.price * item.count} EGP</span>
                         <button
-                          onClick={() =>
-                            addToCart({ id: item.id, name: item.name, price: item.price })
-                          }
+                          onClick={() => addToCart({ id: item.id, name: item.name, price: item.price })}
                           className="text-green-500 text-sm"
                         >
                           +
@@ -297,4 +295,4 @@ export default function Cashier2({
       </div>
     </div>
   );
-         }
+  } 
