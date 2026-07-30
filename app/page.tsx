@@ -2,13 +2,12 @@
 
 import React, { useState } from 'react';
 import Storefront from './components/storefront';
-import Cashier2 from './components/cashier2'; // ← ده الجديد
+import Cashier2 from './components/cashier2';
 import Owner from './components/owner';
 
 type Role = 'visitor' | 'cashier' | 'owner' | null;
 
 export default function Home() {
-  // مؤقت: ناخدين state محلي للـ cart/clients/expenses جوه الصفحة
   const [cart, setCart] = useState<{ id: number; name: string; price: number; count: number }[]>([]);
   const [products, setProducts] = useState<any[]>([
     { id: 1, name: 'منتج 1', price: 10 },
@@ -21,14 +20,20 @@ export default function Home() {
   ]);
   const [heroBanner, setHeroBanner] = useState<string>('');
   const [newProductData, setNewProductData] = useState<any>({
-    name: '', price: '', stock: '', criticalLevel: '', expiry: '', category: 'olive_oil', description: ''
+    name: '',
+    price: '',
+    stock: '',
+    criticalLevel: '',
+    expiry: '',
+    category: 'olive_oil',
+    description: ''
   });
   const [loyaltySettings, setLoyaltySettings] = useState<{ pointsPerEGP: number; rewardThreshold: number }>({
     pointsPerEGP: 100,
     rewardThreshold: 500,
   });
 
-  const [role, setRole] = useState<Role>(null);
+  const [role, setRole] = useState<Role>('visitor');
 
   function processImageUpload(e: React.ChangeEvent<HTMLInputElement>, id: number) {
     const file = e.target.files?.[0];
@@ -57,7 +62,15 @@ export default function Home() {
         description: newProductData.description,
       }
     ]);
-    setNewProductData({ name: '', price: '', stock: '', criticalLevel: '', expiry: '', category: 'olive_oil', description: '' });
+    setNewProductData({
+      name: '',
+      price: '',
+      stock: '',
+      criticalLevel: '',
+      expiry: '',
+      category: 'olive_oil',
+      description: ''
+    });
   }
 
   if (role === 'cashier') {
@@ -96,34 +109,11 @@ export default function Home() {
     );
   }
 
-  if (role === 'visitor') {
-    return <Storefront setRole={setRole} />;
-  }
-
   return (
-    <div className="min-h-screen bg-[#f5f2eb] flex flex-col items-center justify-center gap-6 p-6">
-      <h1 className="text-3xl font-black text-[#1e6b65]">ابن شالي</h1>
-
-      <button
-        onClick={() => setRole('visitor')}
-        className="bg-[#1e6b65] text-white px-8 py-4 rounded-xl font-bold text-lg"
-      >
-        المتجر
-      </button>
-
-      <button
-        onClick={() => setRole('cashier')}
-        className="bg-[#3d2e24] text-white px-8 py-4 rounded-xl font-bold text-lg"
-      >
-        الكاشير
-      </button>
-
-      <button
-        onClick={() => setRole('owner')}
-        className="bg-[#8b5a2b] text-white px-8 py-4 rounded-xl font-bold text-lg"
-      >
-        الإدارة
-      </button>
-    </div>
+    <Storefront
+      products={products}
+      setRole={setRole}
+      heroBanner={heroBanner}
+    />
   );
-      }
+}
