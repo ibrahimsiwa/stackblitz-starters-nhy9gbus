@@ -1,36 +1,58 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ShoppingCart, Eye, X, Lock, Package } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { ShoppingCart, Eye, X, Lock, Package, Shield } from 'lucide-react';
 
 interface StorefrontProps {
   products?: any[];
   setRole: (role: 'visitor' | 'cashier' | 'owner' | null) => void;
   heroBanner?: string;
+  onOpenAuth?: () => void;
+  hasOwner?: boolean;
+  session?: { username: string; role: 'cashier' | 'owner' } | null;
+  onLogout?: () => void;
 }
 
-export default function Storefront({ products = [], setRole = () => {}, heroBanner = '' }: StorefrontProps) {
-  const [visitorCart, setVisitorCart] = useState<any>({});
+export default function Storefront({
+  products = [],
+  setRole = () => {},
+  heroBanner = '',
+  onOpenAuth = () => {},
+  hasOwner = false,
+  session = null,
+  onLogout = () => {},
+}: StorefrontProps) {
+  const [visitorCart, setVisitorCart] = useState<Record<number, any>>({});
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [showVisitorCartModal, setShowVisitorCartModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
 
-  const visitorSubtotal = Object.values(visitorCart).reduce((s: number, i: any) => s + (i.price * i.quantity), 0);
-  const totalItemsCount = Object.values(visitorCart).reduce((s: number, i: any) => s + i.quantity, 0);
+  const visitorSubtotal = useMemo(
+    () => Object.values(visitorCart).reduce((s: number, i: any) => s + i.price * i.quantity, 0),
+    [visitorCart]
+  );
+  const totalItemsCount = useMemo(
+    () => Object.values(visitorCart).reduce((s: number, i: any) => s + i.quantity, 0),
+    [visitorCart]
+  );
 
   const addToVisitorCart = (p: any) => {
-    setVisitorCart((prev: any) => ({
+    setVisitorCart(prev => ({
       ...prev,
-      [p.id]: { ...p, quantity: (prev[p.id]?.quantity || 0) + 1 }
+      [p.id]: { ...p, quantity: (prev[p.id]?.quantity || 0) + 1 },
     }));
   };
 
   const updateVisitorCartQty = (id: number, change: number) => {
-    setVisitorCart((prev: any) => {
-      const item = prev[id]; if (!item) return prev;
+    setVisitorCart(prev => {
+      const item = prev[id];
+      if (!item) return prev;
       const nextQty = item.quantity + change;
-      if (nextQty <= 0) { const { [id]: _, ...rest } = prev; return rest; }
+      if (nextQty <= 0) {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      }
       return { ...prev, [id]: { ...item, quantity: nextQty } };
     });
   };
@@ -41,8 +63,9 @@ export default function Storefront({ products = [], setRole = () => {}, heroBann
       itemsLines += `• ${i.name} (عدد ${i.quantity}) -> ${i.price * i.quantity} ج.م
 `;
     });
-    
-    const message = `✨ طلب شراء موحد - متجر ابن شالي الفاخر ✨
+
+    const message =
+`السلام عليكم
 ------------------------
 يسعدني طلب باقة المنتجات الطبيعية التالية:
 
@@ -52,23 +75,42 @@ ${itemsLines}
 ------------------------
 برجاء مراجعة الطلب وتأكيد الشحن والتوصيل للمنزل.
 خلاصة الود.`;
+
     window.open(`https://wa.me/201094241177?text=${encodeURIComponent(message)}`, '_blank');
     setVisitorCart({});
     setShowVisitorCartModal(false);
   };
 
   const handleVerifyAccess = () => {
-    if (passwordInput === "325748619") {
+    if (passwordInput === '325748619') {
       setRole('cashier');
       setShowAuthModal(false);
       setPasswordInput('');
     } else {
-      alert("رمز الأمان الموحد غير صحيح. يرجى مراجعة ميثاق العهدة.");
+      alert('رمز الأمان الموحد غير صحيح. يرجى مراجعة ميثاق العهدة.');
     }
   };
 
   return (
     <div className="min-h-screen bg-siwa-beige text-siwa-brown font-sans antialiased selection:bg-siwa-spring/10 selection:text-siwa-spring">
+      <button
+        onClick={onOpenAuth}
+        className="fixed top-4 left-4 z-40 w-11 h-11 rounded-full bg-[#fcfbfa]/90 shadow-md border border-siwa-brown/10 flex items-center justify-center text-siwa-brown hover:text-siwa-spring transition"
+        aria-label="الدخول"
+        title="الدخول"
+      >
+        <Shield className="w-4 h-4" />
+      </button>
+
+      {session && (
+        <button
+          onClick={onLogout}
+          className="fixed top-4 right-4 z-40 text-[10px] px-3 py-2 rounded-full bg-[#fcfbfa]/90 border border-siwa-brown/10 text-siwa-brown shadow-sm"
+        >
+          خروج
+        </button>
+      )}
+
       <header className="py-12 text-center bg-[#fcfbfa]/90 backdrop-blur-sm border-b border-siwa-brown/5 sticky top-0 z-30 shadow-sm">
         <h1 className="text-4xl md:text-5xl font-black tracking-widest text-siwa-brown font-serif">ابن شالي</h1>
         <p className="text-[10px] uppercase tracking-widest text-siwa-spring font-black mt-1.5 tracking-wider">IBN SHALI • خلاصة الود</p>
@@ -116,9 +158,9 @@ ${itemsLines}
       </main>
 
       {totalItemsCount > 0 && (
-        <button onClick={() => setShowVisitorCartModal(true)} className="fixed bottom-8 left-8 bg-siwa-spring text-white p-4.5 rounded-full shadow-2xl flex items-center gap-2 animate-bounce z-40 border border-siwa-spring/20">
+        <button onClick={() => setShowVisitorCartModal(true)} className="fixed bottom-8 left-8 bg-siwa-spring text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-2 z-40 border border-siwa-spring/20">
           <ShoppingCart className="w-5 h-5" />
-          <span className="bg-[#fcfbfa] text-siwa-spring rounded-full w-5 h-5 text-[10px] font-black flex items-center justify-center shadow-inner">{totalItemsCount}</span>
+          <span className="bg-[#fcfbfa] text-siwa-spring rounded-full min-w-5 h-5 px-1 text-[10px] font-black flex items-center justify-center shadow-inner">{totalItemsCount}</span>
           <span className="text-xs font-black font-mono pl-1">{visitorSubtotal} ج</span>
         </button>
       )}
@@ -134,7 +176,7 @@ ${itemsLines}
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-siwa-brown/70 backdrop-blur-md p-4 animate-fade-in">
           <div className="bg-[#fcfbfa] border border-siwa-brown/20 rounded-3xl p-6 max-w-4xl w-full relative shadow-2xl space-y-6">
             <button onClick={() => setSelectedProduct(null)} className="absolute top-5 left-5 text-siwa-brown/40 hover:text-siwa-brown p-1.5 rounded-full hover:bg-stone-100 transition-all"><X className="w-5 h-5" /></button>
-            
+
             <div className="border-b border-siwa-brown/5 pb-3 text-right">
               <h3 className="text-base font-black text-siwa-brown tracking-wide">{selectedProduct.name}</h3>
               <p className="text-[10px] text-siwa-spring font-black tracking-widest uppercase mt-0.5 font-mono">ORIGIN SPECIFICATION • وثيقة التوثيق والتحاليل الفنية</p>
@@ -162,36 +204,49 @@ ${itemsLines}
               </div>
             </div>
 
-            <button onClick={() => { addToVisitorCart(selectedProduct); setSelectedProduct(null); }} className="w-full bg-siwa-spring hover:bg-[#154d49] text-white font-black text-xs py-3.5 rounded-xl transition tracking-widest shadow-md">إضافة الصنف وتأكيد الحجز بالسلة الفاخرة</button>
+            <button onClick={() => { addToVisitorCart(selectedProduct); setSelectedProduct(null); }} className="w-full bg-siwa-spring hover:bg-[#154d49] text-white font-black text-xs py-3.5 rounded-xl transition tracking-widest shadow-md">تأكيد الطلب</button>
           </div>
         </div>
       )}
 
       {showVisitorCartModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-siwa-brown/70 backdrop-blur-md p-4">
-          <div className="w-full max-w-sm rounded-3xl border border-siwa-brown/10 bg-[#fcfbfa] p-6 space-y-4 shadow-2xl relative">
+          <div className="w-full max-w-md rounded-3xl border border-siwa-brown/10 bg-[#fcfbfa] p-6 space-y-5 shadow-2xl relative">
             <button onClick={() => setShowVisitorCartModal(false)} className="absolute top-4 left-4 text-stone-400 hover:text-stone-700"><X className="w-4 h-4" /></button>
-            <h3 className="text-xs font-black text-siwa-brown uppercase border-b border-stone-100 pb-2 flex items-center gap-1.5"><ShoppingCart className="w-4 h-4 text-siwa-spring" /> باقة طلباتك الحالية الفاخرة</h3>
-            
-            <div className="space-y-2 max-h-52 overflow-y-auto">
-              {Object.values(visitorCart).map((item: any) => (
-                <div key={item.id} className="flex justify-between items-center text-xs bg-siwa-beige/40 p-2.5 rounded-xl border border-stone-200/40">
-                  <span className="font-bold text-siwa-brown truncate max-w-[160px]">{item.name}</span>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => updateVisitorCartQty(item.id, -1)} className="bg-stone-200 w-5 h-5 rounded flex items-center justify-center font-bold text-siwa-brown">-</button>
-                    <span className="font-mono font-black text-siwa-brown">{item.quantity}</span>
-                    <button onClick={() => updateVisitorCartQty(item.id, 1)} className="bg-stone-200 w-5 h-5 rounded flex items-center justify-center font-bold text-siwa-brown">+</button>
+            <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+              <h3 className="text-xs font-black text-siwa-brown uppercase flex items-center gap-1.5">
+                <ShoppingCart className="w-4 h-4 text-siwa-spring" /> سلتك
+              </h3>
+              <span className="text-[10px] font-black text-siwa-spring">{totalItemsCount} عناصر</span>
+            </div>
+
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              {Object.values(visitorCart).length === 0 ? (
+                <p className="text-xs text-stone-400 text-center py-8">لا توجد عناصر في السلة</p>
+              ) : (
+                Object.values(visitorCart).map((item: any) => (
+                  <div key={item.id} className="flex justify-between items-center text-xs bg-siwa-beige/40 p-3 rounded-2xl border border-stone-200/40">
+                    <div className="min-w-0">
+                      <span className="font-bold text-siwa-brown truncate block max-w-[180px]">{item.name}</span>
+                      <span className="text-[10px] text-stone-500 font-mono">{item.price} ج.م للوحدة</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => updateVisitorCartQty(item.id, -1)} className="bg-stone-200 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-siwa-brown">-</button>
+                      <span className="font-mono font-black text-siwa-brown w-5 text-center">{item.quantity}</span>
+                      <button onClick={() => updateVisitorCartQty(item.id, 1)} className="bg-stone-200 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-siwa-brown">+</button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
             <div className="pt-3 border-t border-stone-100 flex justify-between items-center text-xs font-black text-siwa-spring">
-              <span>إجمالي قيمة المشتريات:</span><span className="font-mono text-sm font-black">{visitorSubtotal} ج.م</span>
+              <span>إجمالي قيمة الطلب:</span>
+              <span className="font-mono text-sm font-black">{visitorSubtotal} ج.م</span>
             </div>
 
             <button onClick={handleSendWhatsAppOrder} className="w-full bg-siwa-spring hover:bg-[#154d49] text-white font-black text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md tracking-widest">
-              <span>إرسال الطلب موحداً عبر واتساب</span> 📱
+              <span>تأكيد الطلب عبر واتساب</span> 📱
             </button>
           </div>
         </div>
@@ -200,8 +255,13 @@ ${itemsLines}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-siwa-brown/60 backdrop-blur-sm p-4">
           <div className="bg-[#fcfbfa] border border-siwa-brown/20 rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
-            <div className="w-12 h-12 rounded-full bg-siwa-spring/10 border border-siwa-spring/20 flex items-center justify-center mx-auto"><Lock className="w-5 h-5 text-siwa-spring" /></div>
-            <div className="space-y-1"><h3 className="text-sm font-black text-siwa-brown">بوابة الولوج والتحقق للعهدات</h3><p className="text-[11px] text-[#4a3b32]/60">يرجى إدخال رمز الأمان الموثق لبراند ابن شالي لفتح شاشة المبيعات والفرع.</p></div>
+            <div className="w-12 h-12 rounded-full bg-siwa-spring/10 border border-siwa-spring/20 flex items-center justify-center mx-auto">
+              <Lock className="w-5 h-5 text-siwa-spring" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-black text-siwa-brown">بوابة الولوج والتحقق للعهدات</h3>
+              <p className="text-[11px] text-[#4a3b32]/60">يرجى إدخال رمز الأمان الموثق لبراند ابن شالي.</p>
+            </div>
             <input type="password" placeholder="أدخل رمز التحقق الفاخر..." value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} className="w-full bg-[#fcfbfa] border border-[#4a3b32]/10 rounded-xl px-3 py-3 text-center text-xs tracking-widest font-mono focus:outline-none" />
             <div className="flex gap-2 pt-2">
               <button onClick={handleVerifyAccess} className="flex-1 bg-siwa-spring text-white text-xs font-black py-2.5 rounded-xl transition">تأكيد والولوج</button>
@@ -210,7 +270,6 @@ ${itemsLines}
           </div>
         </div>
       )}
-
     </div>
   );
-                  }
+}
