@@ -15,6 +15,8 @@ interface OwnerProps {
   heroBanner?: string;
   setHeroBanner?: (img: string) => void;
   setProducts?: React.Dispatch<React.SetStateAction<any[]>>;
+  setExpenses?: React.Dispatch<React.SetStateAction<any[]>>;
+  setCustomers?: React.Dispatch<React.SetStateAction<any[]>>;
   setRole: (role: 'visitor' | 'cashier' | 'owner') => void;
   processImageUpload?: (e: React.ChangeEvent<HTMLInputElement>, id: number) => void;
   submitNewProduct?: (e: React.FormEvent) => void;
@@ -146,7 +148,7 @@ export default function Owner({
       {/* جدول جرد ورصيد المخزن المركزي */}
       <div className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-3xl overflow-hidden shadow-sm">
         <table className="w-full text-right text-xs">
-          <thead className="bg-[#f5f2eb] text-[#3d2e24] border-b border-[#3d2e24]/10 font-bold"><tr><th className="p-4">اسم صنف التحفة الطبيعية لـ "ابن شالي"</th><th className="p-4">الرصيد المتاح بالفرع</th><th className="p-4 text-center">نظام التنبيه التلقائي</th><th className="p-4 text-center">تاريخ انتهاء الصلاحية الموثق</th></tr></thead>
+          <thead className="bg-[#f5f2eb] text-[#3d2e24] border-b border-[#3d2e24]/10 font-bold"><tr><th className="p-4">اسم صنف التحفة الطبيعية لـ ابن شالي</th><th className="p-4">الرصيد المتاح بالفرع</th><th className="p-4 text-center">نظام التنبيه التلقائي</th><th className="p-4 text-center">تاريخ انتهاء الصلاحية الموثق</th></tr></thead>
           <tbody className="divide-y divide-[#3d2e24]/10">
             {products.map(p => (
               <tr key={p.id} className="hover:bg-stone-50"><td className="p-4 font-black text-[#3d2e24]">{p.name}</td><td className="p-4 font-mono font-bold text-stone-500">{p.stock} عبوة</td><td className="p-4 text-center">{p.stock <= p.criticalLevel ? (<span className="bg-rose-50 text-rose-600 border border-rose-200 text-[10px] px-2.5 py-1 rounded-full font-black animate-pulse">تحذير: مخزون حرج!</span>) : (<span className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] px-2.5 py-1 rounded-full font-bold">آمن ومستقر</span>)}</td><td className="p-4 text-center font-mono font-bold text-[#1e6b65]">{p.expiry}</td></tr>
@@ -157,7 +159,7 @@ export default function Owner({
 
       {/* النسخ الاحتياطي والبريد الإلكتروني المؤتمت للتقارير الأسبوعية للبراند */}
       <div className="bg-[#fcfbfa] border border-[#3d2e24]/10 rounded-3xl p-6 shadow-md grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2"><h3 className="text-xs font-black text-[#3d2e24] flex items-center gap-1.5"><Database className="w-4 h-4 text-[#1e6b65]" /> النسخ الاحتياطي والأمان التلقائي</h3><p className="text-xs text-[#4a3b32]/80 leading-relaxed font-medium">قاعدة البيانات الاحتياطية السحابية مؤمنة كلياً وتقوم بعمل حفظ دوري وتلقائي لكافة الحركات المالية وتحديثات جرد المخازن المباشرة لـ "ابن شالي".</p></div>
+        <div className="space-y-2"><h3 className="text-xs font-black text-[#3d2e24] flex items-center gap-1.5"><Database className="w-4 h-4 text-[#1e6b65]" /> النسخ الاحتياطي والأمان التلقائي</h3><p className="text-xs text-[#4a3b32]/80 leading-relaxed font-medium">قاعدة البيانات الاحتياطية السحابية مؤمنة كلياً وتقوم بعمل حفظ دوري وتلقائي لكافة الحركات المالية وتحديثات جرد المخازن المباشرة لـ ابن شالي.</p></div>
         <div className="space-y-2 border-r border-[#3d2e24]/10 pr-6"><h3 className="text-xs font-black text-[#3d2e24] flex items-center gap-1.5"><Mail className="w-4 h-4 text-amber-600" /> التقارير الشاملة وجدولة الإيميل الآلي</h3><p className="text-xs text-[#4a3b32]/80 leading-relaxed font-medium">النظام مجدول لإرسال تقرير وجرد أسبوعي دوري متكامل وشامل للمبيعات والمخزن مباشرة إلى بريد الإدارة المعتمد والموثق للتاجر إبراهيم:</p><p className="text-xs font-mono font-black text-[#1e6b65] bg-[#f5f2eb] p-2 rounded-xl text-center border border-[#3d2e24]/5">ibrahimsiwa360@gmail.com</p></div>
       </div>
       </>
