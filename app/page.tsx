@@ -14,9 +14,9 @@ type AppUser = {
   role: UserRole;
 };
 
-type AppSession = {
-  username: string;
-  role: UserRole;
+
+  { username: 'abnshaly', password: 'abn325748619', role: 'owner'
+ }
 };
 
 type LoyaltySettings = {
