@@ -1,6 +1,5 @@
 'use client';
 
-onOpenAuth?: () => void;
 
 import React, { useMemo, useState } from 'react';
 import { ShoppingCart, Eye, X, Lock, Package, Shield } from 'lucide-react';
@@ -14,6 +13,7 @@ interface StorefrontProps {
   onLogout?: () => void;
   onAuthSuccess?: (username: string, role: 'cashier' | 'owner') => void;
   users?: { username: string; password: string; role: 'cashier' | 'owner' }[];
+  onOpenAuth?: () => void;
 }
 
 export default function Storefront({
