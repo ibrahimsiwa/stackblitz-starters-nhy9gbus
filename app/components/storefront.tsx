@@ -1,5 +1,7 @@
 'use client';
 
+onOpenAuth?: () => void;
+
 import React, { useMemo, useState } from 'react';
 import { ShoppingCart, Eye, X, Lock, Package, Shield } from 'lucide-react';
 
