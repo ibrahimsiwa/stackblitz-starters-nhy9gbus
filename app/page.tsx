@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Storefront from './components/storefront';
 import Cashier2 from './components/cashier2';
 import Owner from './components/owner';
@@ -14,9 +14,9 @@ type AppUser = {
   role: UserRole;
 };
 
-
-  { username: 'abnshaly', password: 'abn325748619', role: 'owner'
- }
+type AppSession = {
+  username: string;
+  role: UserRole;
 };
 
 type LoyaltySettings = {
@@ -63,7 +63,6 @@ export default function Home() {
   const [authUsername, setAuthUsername] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authConfirm, setAuthConfirm] = useState('');
-  const [authRole, setAuthRole] = useState<UserRole>('cashier');
   const [authMessage, setAuthMessage] = useState('');
 
   useEffect(() => {
@@ -72,17 +71,25 @@ export default function Home() {
       const rawUsers = localStorage.getItem(USERS_KEY);
       const rawSession = localStorage.getItem(SESSION_KEY);
 
-      if (rawUsers) setUsers(JSON.parse(rawUsers));
+      if (rawUsers) {
+        setUsers(JSON.parse(rawUsers));
+      } else {
+        const defaultUsers: AppUser[] = [
+          { username: 'abnshaly', password: 'abn325748619', role: 'owner' },
+        ];
+        setUsers(defaultUsers);
+        localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
+      }
+
       if (rawSession) {
-        const parsed = JSON.parse(rawSession) as AppSession;
-        setSession(parsed);
+        setSession(JSON.parse(rawSession));
       }
     } catch {}
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
-    if (users.length) localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
   }, [users, mounted]);
 
   useEffect(() => {
@@ -97,8 +104,6 @@ export default function Home() {
     else if (session?.role === 'cashier') setRole('cashier');
     else setRole('visitor');
   }, [session, mounted]);
-
-  const hasOwner = useMemo(() => users.some(u => u.role === 'owner'), [users]);
 
   function processImageUpload(e: React.ChangeEvent<HTMLInputElement>, id: number) {
     const file = e.target.files?.[0];
@@ -144,7 +149,6 @@ export default function Home() {
     setAuthUsername('');
     setAuthPassword('');
     setAuthConfirm('');
-    setAuthRole('cashier');
     setAuthOpen(true);
   }
 
@@ -152,13 +156,13 @@ export default function Home() {
     const cleanUsername = authUsername.trim();
 
     if (!cleanUsername || authPassword.trim().length < 6) {
-      setAuthMessage('الاسم مطلوب، وكلمة المرور يجب ألا تقل عن 6 أحرف.');
+      setAuthMessage('اسم و رمز صحيحان فقط.');
       return;
     }
 
     if (authMode === 'setup') {
       if (authPassword !== authConfirm) {
-        setAuthMessage('كلمتا المرور غير متطابقتين.');
+        setAuthMessage('الرمزان غير متطابقين.');
         return;
       }
       if (users.some(u => u.username.toLowerCase() === cleanUsername.toLowerCase())) {
@@ -181,12 +185,11 @@ export default function Home() {
     const matched = users.find(
       u =>
         u.username.toLowerCase() === cleanUsername.toLowerCase() &&
-        u.password === authPassword &&
-        u.role === authRole
+        u.password === authPassword
     );
 
     if (!matched) {
-      setAuthMessage('بيانات الدخول غير صحيحة أو لا تملك صلاحية لهذا المسار.');
+      setAuthMessage('البيانات غير صحيحة.');
       return;
     }
 
@@ -235,7 +238,7 @@ export default function Home() {
         setUsers={setUsers}
         session={session}
         onLogout={handleLogout}
-        openAuthSetup={() => openAuth('setup')}
+        openAuthSetup={() => openAuth('login')}
       />
     );
   }
@@ -245,13 +248,13 @@ export default function Home() {
       products={products}
       setRole={setRole}
       heroBanner={heroBanner}
-      onOpenAuth={() => {
-        if (!hasOwner) openAuth('setup');
-        else openAuth('login');
-      }}
-      hasOwner={hasOwner}
+      hasOwner={true}
       session={session}
       onLogout={handleLogout}
+      onAuthSuccess={(username, role) => {
+        setSession({ username, role });
+      }}
+      users={users}
     />
   );
 }
