@@ -93,14 +93,14 @@ ${itemsLines}
 
   return (
     <div className="min-h-screen bg-siwa-beige text-siwa-brown font-sans antialiased selection:bg-siwa-spring/10 selection:text-siwa-spring">
-      <button
-        onClick={onOpenAuth}
-        className="fixed top-4 left-4 z-40 w-11 h-11 rounded-full bg-[#fcfbfa]/90 shadow-md border border-siwa-brown/10 flex items-center justify-center text-siwa-brown hover:text-siwa-spring transition"
-        aria-label="الدخول"
-        title="الدخول"
-      >
-        <Shield className="w-4 h-4" />
-      </button>
+<button
+  onClick={onOpenAuth}
+  className="fixed bottom-4 right-4 z-[60] w-10 h-10 rounded-full bg-[#fcfbfa]/95 shadow-lg border border-siwa-brown/10 flex items-center justify-center text-siwa-brown hover:text-siwa-spring active:scale-95 transition"
+  aria-label="الدخول"
+  title="الدخول"
+>
+  <Shield className="w-4 h-4" />
+</button>
 
       {session && (
         <button
