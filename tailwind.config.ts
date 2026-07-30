@@ -8,6 +8,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        'siwa-beige': '#F5F2EB',
+        'siwa-brown': '#3D2E24',
+        'siwa-gold': '#C9A227',
+        'siwa-spring': '#1E6B65',
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
