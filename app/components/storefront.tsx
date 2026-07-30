@@ -93,22 +93,17 @@ ${itemsLines}
 
   return (
     <div className="min-h-screen bg-siwa-beige text-siwa-brown font-sans antialiased selection:bg-siwa-spring/10 selection:text-siwa-spring">
-<button
-  onClick={onOpenAuth}
-  className="fixed bottom-4 right-4 z-[60] w-10 h-10 rounded-full bg-[#fcfbfa]/95 shadow-lg border border-siwa-brown/10 flex items-center justify-center text-siwa-brown hover:text-siwa-spring active:scale-95 transition"
+ <button
+  onClick={() => {
+    onOpenAuth();
+    setShowAuthModal(true);
+  }}
+  className="fixed bottom-4 right-4 z-[9999] w-10 h-10 rounded-full bg-[#fcfbfa]/95 shadow-lg border border-siwa-brown/10 flex items-center justify-center text-siwa-brown hover:text-siwa-spring active:scale-95 transition pointer-events-auto"
   aria-label="الدخول"
   title="الدخول"
 >
-  <Shield className="w-4 h-4" />
+  <Shield className="w-4 h-4 pointer-events-none" />
 </button>
-
-      {session && (
-        <button
-          onClick={onLogout}
-          className="fixed top-4 right-4 z-40 text-[10px] px-3 py-2 rounded-full bg-[#fcfbfa]/90 border border-siwa-brown/10 text-siwa-brown shadow-sm"
-        >
-          خروج
-        </button>
       )}
 
       <header className="py-12 text-center bg-[#fcfbfa]/90 backdrop-blur-sm border-b border-siwa-brown/5 sticky top-0 z-30 shadow-sm">
@@ -167,9 +162,6 @@ ${itemsLines}
 
       <footer className="bg-[#fcfbfa] border-t border-siwa-brown/5 py-12 text-center text-xs text-[#4a3b32]/50 space-y-2">
         <p className="font-medium tracking-wide">ابن شالي — خلاصة الود © 2026</p>
-        <button onClick={() => setShowAuthModal(true)} className="text-[9px] text-stone-400 font-black tracking-widest uppercase block mx-auto pt-2 border-t border-stone-100 w-36 hover:text-siwa-spring transition-colors">
-          [ بوابة الولوج والتحقق للعهدات ]
-        </button>
       </footer>
 
       {selectedProduct && (
