@@ -7,26 +7,33 @@ interface StorefrontProps {
   products?: any[];
   setRole: (role: 'visitor' | 'cashier' | 'owner' | null) => void;
   heroBanner?: string;
-  onOpenAuth?: () => void;
   hasOwner?: boolean;
   session?: { username: string; role: 'cashier' | 'owner' } | null;
   onLogout?: () => void;
+  onAuthSuccess?: (username: string, role: 'cashier' | 'owner') => void;
+  users?: { username: string; password: string; role: 'cashier' | 'owner' }[];
 }
 
 export default function Storefront({
   products = [],
   setRole = () => {},
   heroBanner = '',
-  onOpenAuth = () => {},
   hasOwner = false,
   session = null,
   onLogout = () => {},
+  onAuthSuccess = () => {},
+  users = [],
 }: StorefrontProps) {
   const [visitorCart, setVisitorCart] = useState<Record<number, any>>({});
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [showVisitorCartModal, setShowVisitorCartModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const [authMode, setAuthMode] = useState<'login' | 'setup'>(hasOwner ? 'login' : 'setup');
+  const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [confirmInput, setConfirmInput] = useState('');
+  const [authMessage, setAuthMessage] = useState('');
 
   const visitorSubtotal = useMemo(
     () => Object.values(visitorCart).reduce((s: number, i: any) => s + i.price * i.quantity, 0),
@@ -49,17 +56,12 @@ export default function Storefront({
     setVisitorCart(prev => {
       const item = prev[id];
       if (!item) return prev;
-
       const nextQty = item.quantity + change;
       if (nextQty <= 0) {
         const { [id]: _, ...rest } = prev;
         return rest;
       }
-
-      return {
-        ...prev,
-        [id]: { ...item, quantity: nextQty },
-      };
+      return { ...prev, [id]: { ...item, quantity: nextQty } };
     });
   };
 
@@ -86,20 +88,52 @@ ${itemsLines}
     setShowVisitorCartModal(false);
   };
 
-  const handleVerifyAccess = () => {
-    if (passwordInput === '325748619') {
-      setRole('cashier');
-      setShowAuthModal(false);
-      setPasswordInput('');
-    } else {
-      alert('رمز الأمان الموحد غير صحيح. يرجى مراجعة ميثاق العهدة.');
+  const submitAuth = () => {
+    const cleanUsername = usernameInput.trim();
+
+    if (!cleanUsername || passwordInput.trim().length < 6) {
+      setAuthMessage('اسم و رمز صحيحان فقط.');
+      return;
     }
+
+    if (authMode === 'setup') {
+      if (passwordInput !== confirmInput) {
+        setAuthMessage('الرمزان غير متطابقين.');
+        return;
+      }
+      onAuthSuccess(cleanUsername, 'owner');
+      setRole('owner');
+      setShowAuthModal(false);
+      return;
+    }
+
+    const matched = users.find(
+      u =>
+        u.username.toLowerCase() === cleanUsername.toLowerCase() &&
+        u.password === passwordInput
+    );
+
+    if (!matched) {
+      setAuthMessage('البيانات غير صحيحة.');
+      return;
+    }
+
+    onAuthSuccess(matched.username, matched.role);
+    setRole(matched.role);
+    setShowAuthModal(false);
   };
 
   return (
     <div className="min-h-screen bg-siwa-beige text-siwa-brown font-sans antialiased selection:bg-siwa-spring/10 selection:text-siwa-spring">
       <button
-        onClick={() => setShowAuthModal(true)}
+        onClick={() => {
+          setAuthMode(hasOwner ? 'login' : 'setup');
+          setAuthMessage('');
+          setUsernameInput('');
+          setPasswordInput('');
+          setConfirmInput('');
+          setShowAuthModal(true);
+        }}
         className="fixed bottom-4 right-4 z-[9999] w-10 h-10 rounded-full bg-[#fcfbfa]/95 shadow-lg border border-siwa-brown/10 flex items-center justify-center text-siwa-brown hover:text-siwa-spring active:scale-95 transition pointer-events-auto"
         aria-label="الدخول"
         title="الدخول"
@@ -211,14 +245,14 @@ ${itemsLines}
             <div className="border-b border-siwa-brown/5 pb-3 text-right">
               <h3 className="text-base font-black text-siwa-brown tracking-wide">{selectedProduct.name}</h3>
               <p className="text-[10px] text-siwa-spring font-black tracking-widest uppercase mt-0.5 font-mono">
-                ORIGIN SPECIFICATION • وثيقة التوثيق والتحاليل الفنية
+                وثيقة التوثيق والتحاليل الفنية
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start pt-2">
               <div className="space-y-2 bg-siwa-beige/60 p-4 rounded-2xl border border-siwa-brown/5 text-xs leading-relaxed font-semibold">
                 <span className="text-[9px] text-siwa-spring font-black uppercase tracking-wider block mb-1">
-                  🌿 ميثاق الحيوية والصحة
+                  ميثاق الحيوية والصحة
                 </span>
                 <p className="text-[#4a3b32] font-medium">{selectedProduct.benefits || selectedProduct.description}</p>
               </div>
@@ -242,7 +276,7 @@ ${itemsLines}
 
               <div className="space-y-2 bg-siwa-beige/60 p-4 rounded-2xl border border-siwa-brown/5 text-xs leading-relaxed font-medium">
                 <span className="text-[9px] text-siwa-spring font-black uppercase tracking-wider block mb-1">
-                  🔬 المقاييس والتحاليل التقنية
+                  المقاييس والتحاليل التقنية
                 </span>
                 <p className="text-siwa-brown font-black bg-[#fcfbfa] p-2.5 rounded-xl border border-stone-200/40 text-center tracking-wide">
                   {selectedProduct.specification || 'المنشأ: واحة سيوة الطبيعية البكر الموثقة.'}
@@ -276,7 +310,7 @@ ${itemsLines}
 
             <div className="flex items-center justify-between border-b border-stone-100 pb-2">
               <h3 className="text-xs font-black text-siwa-brown uppercase flex items-center gap-1.5">
-                <ShoppingCart className="w-4 h-4 text-siwa-spring" /> سلتك
+                <ShoppingCart className="w-4 h-4 text-siwa-spring" /> السلة
               </h3>
               <span className="text-[10px] font-black text-siwa-spring">{totalItemsCount} عناصر</span>
             </div>
@@ -335,34 +369,73 @@ ${itemsLines}
             <div className="w-12 h-12 rounded-full bg-siwa-spring/10 border border-siwa-spring/20 flex items-center justify-center mx-auto">
               <Lock className="w-5 h-5 text-siwa-spring" />
             </div>
+
             <div className="space-y-1">
-              <h3 className="text-sm font-black text-siwa-brown">بوابة الولوج</h3>
-              <p className="text-[11px] text-[#4a3b32]/60">يرجى إدخال رمز الأمان الموثق لبراند ابن شالي.</p>
+              <h3 className="text-sm font-black text-siwa-brown">صفحة الدخول</h3>
+              <p className="text-[11px] text-[#4a3b32]/60">
+                {authMode === 'setup' ? 'إنشاء المدير الأول.' : 'أدخل الاسم والرمز.'}
+              </p>
             </div>
-            <input
-              type="password"
-              placeholder="أدخل رمز التحقق الفاخر..."
-              value={passwordInput}
-              onChange={(e) => setPasswordInput(e.target.value)}
-              className="w-full bg-[#fcfbfa] border border-[#4a3b32]/10 rounded-xl px-3 py-3 text-center text-xs tracking-widest font-mono focus:outline-none"
-            />
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={handleVerifyAccess}
-                className="flex-1 bg-siwa-spring text-white text-xs font-black py-2.5 rounded-xl transition"
-              >
-                تأكيد والولوج
-              </button>
-              <button
-                onClick={() => {
-                  setShowAuthModal(false);
-                  setPasswordInput('');
-                }}
-                className="bg-stone-100 text-siwa-brown text-xs px-4 rounded-xl transition"
-              >
-                إلغاء
-              </button>
-            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                submitAuth();
+              }}
+              className="space-y-3"
+            >
+              <input
+                type="text"
+                placeholder="الاسم"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                className="w-full bg-[#fcfbfa] border border-[#4a3b32]/10 rounded-xl px-3 py-3 text-center text-xs tracking-widest font-mono focus:outline-none"
+              />
+
+              <input
+                type="password"
+                placeholder="الرمز"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                className="w-full bg-[#fcfbfa] border border-[#4a3b32]/10 rounded-xl px-3 py-3 text-center text-xs tracking-widest font-mono focus:outline-none"
+              />
+
+              {authMode === 'setup' && (
+                <input
+                  type="password"
+                  placeholder="تأكيد الرمز"
+                  value={confirmInput}
+                  onChange={(e) => setConfirmInput(e.target.value)}
+                  className="w-full bg-[#fcfbfa] border border-[#4a3b32]/10 rounded-xl px-3 py-3 text-center text-xs tracking-widest font-mono focus:outline-none"
+                />
+              )}
+
+              {authMessage && (
+                <p className="text-[11px] text-rose-600 font-bold">{authMessage}</p>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="submit"
+                  className="flex-1 bg-siwa-spring text-white text-xs font-black py-2.5 rounded-xl transition"
+                >
+                  اضغط
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAuthModal(false);
+                    setAuthMessage('');
+                    setPasswordInput('');
+                    setUsernameInput('');
+                    setConfirmInput('');
+                  }}
+                  className="bg-stone-100 text-siwa-brown text-xs px-4 rounded-xl transition"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
