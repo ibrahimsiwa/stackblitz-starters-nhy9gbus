@@ -26,6 +26,13 @@ type LoyaltySettings = {
 
 const USERS_KEY = 'ibnShali_users_v1';
 const SESSION_KEY = 'ibnShali_session_v1';
+const PRODUCTS_KEY = 'ibnShali_products_v1';
+const EXPENSES_KEY = 'ibnShali_expenses_v1';
+const CUSTOMERS_KEY = 'ibnShali_customers_v1';
+const CART_KEY = 'ibnShali_cart_v1';
+const HERO_KEY = 'ibnShali_heroBanner_v1';
+const NEW_PRODUCT_KEY = 'ibnShali_newProduct_v1';
+const LOYALTY_KEY = 'ibnShali_loyalty_v1';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -58,18 +65,18 @@ export default function Home() {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [session, setSession] = useState<AppSession | null>(null);
 
-  const [authOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'setup'>('login');
-  const [authUsername, setAuthUsername] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authConfirm, setAuthConfirm] = useState('');
-  const [authMessage, setAuthMessage] = useState('');
-
   useEffect(() => {
     setMounted(true);
     try {
       const rawUsers = localStorage.getItem(USERS_KEY);
       const rawSession = localStorage.getItem(SESSION_KEY);
+      const rawProducts = localStorage.getItem(PRODUCTS_KEY);
+      const rawExpenses = localStorage.getItem(EXPENSES_KEY);
+      const rawCustomers = localStorage.getItem(CUSTOMERS_KEY);
+      const rawCart = localStorage.getItem(CART_KEY);
+      const rawHero = localStorage.getItem(HERO_KEY);
+      const rawNewProduct = localStorage.getItem(NEW_PRODUCT_KEY);
+      const rawLoyalty = localStorage.getItem(LOYALTY_KEY);
 
       if (rawUsers) {
         setUsers(JSON.parse(rawUsers));
@@ -81,9 +88,14 @@ export default function Home() {
         localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
       }
 
-      if (rawSession) {
-        setSession(JSON.parse(rawSession));
-      }
+      if (rawSession) setSession(JSON.parse(rawSession));
+      if (rawProducts) setProducts(JSON.parse(rawProducts));
+      if (rawExpenses) setExpenses(JSON.parse(rawExpenses));
+      if (rawCustomers) setCustomers(JSON.parse(rawCustomers));
+      if (rawCart) setCart(JSON.parse(rawCart));
+      if (rawHero) setHeroBanner(rawHero);
+      if (rawNewProduct) setNewProductData(JSON.parse(rawNewProduct));
+      if (rawLoyalty) setLoyaltySettings(JSON.parse(rawLoyalty));
     } catch {}
   }, []);
 
@@ -97,6 +109,41 @@ export default function Home() {
     if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     else localStorage.removeItem(SESSION_KEY);
   }, [session, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+  }, [products, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
+  }, [expenses, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers));
+  }, [customers, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  }, [cart, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem(HERO_KEY, heroBanner);
+  }, [heroBanner, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem(NEW_PRODUCT_KEY, JSON.stringify(newProductData));
+  }, [newProductData, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem(LOYALTY_KEY, JSON.stringify(loyaltySettings));
+  }, [loyaltySettings, mounted]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -143,60 +190,6 @@ export default function Home() {
     });
   }
 
-  function openAuth(mode: 'login' | 'setup') {
-    setAuthMode(mode);
-    setAuthMessage('');
-    setAuthUsername('');
-    setAuthPassword('');
-    setAuthConfirm('');
-    setAuthOpen(true);
-  }
-
-  function handleAuthSubmit() {
-    const cleanUsername = authUsername.trim();
-
-    if (!cleanUsername || authPassword.trim().length < 6) {
-      setAuthMessage('اسم و رمز صحيحان فقط.');
-      return;
-    }
-
-    if (authMode === 'setup') {
-      if (authPassword !== authConfirm) {
-        setAuthMessage('الرمزان غير متطابقين.');
-        return;
-      }
-      if (users.some(u => u.username.toLowerCase() === cleanUsername.toLowerCase())) {
-        setAuthMessage('اسم المستخدم موجود بالفعل.');
-        return;
-      }
-
-      const ownerUser: AppUser = {
-        username: cleanUsername,
-        password: authPassword,
-        role: 'owner',
-      };
-
-      setUsers([ownerUser]);
-      setSession({ username: ownerUser.username, role: ownerUser.role });
-      setAuthOpen(false);
-      return;
-    }
-
-    const matched = users.find(
-      u =>
-        u.username.toLowerCase() === cleanUsername.toLowerCase() &&
-        u.password === authPassword
-    );
-
-    if (!matched) {
-      setAuthMessage('البيانات غير صحيحة.');
-      return;
-    }
-
-    setSession({ username: matched.username, role: matched.role });
-    setAuthOpen(false);
-  }
-
   function handleLogout() {
     setSession(null);
     setRole('visitor');
@@ -228,6 +221,8 @@ export default function Home() {
         heroBanner={heroBanner}
         setHeroBanner={setHeroBanner}
         setProducts={setProducts}
+        setExpenses={setExpenses}
+        setCustomers={setCustomers}
         processImageUpload={processImageUpload}
         submitNewProduct={submitNewProduct}
         newProductData={newProductData}
@@ -238,7 +233,7 @@ export default function Home() {
         setUsers={setUsers}
         session={session}
         onLogout={handleLogout}
-        openAuthSetup={() => openAuth('login')}
+        openAuthSetup={() => {}}
       />
     );
   }
