@@ -114,32 +114,21 @@ export default function Cashier2({
 
     let itemsText = '';
     cart.forEach(item => {
-      itemsText += `• ${item.name} × ${item.count} = ${item.price * item.count} ج.م
-`;
+      itemsText += `• ${item.name} × ${item.count} = ${item.price * item.count} ج.م\n`;
     });
 
     const message =
-      `🧾 طلب جديد - ابن شالي
-` +
-      `رقم الأوردر: ${orderNumber}
-` +
-      `------------------------
-` +
-      `العميل: ${customerName} (${customerPhone})
-` +
-      `طريقة الدفع: ${paymentLabel}
-` +
-      `------------------------
-` +
+      `🧾 طلب جديد - ابن شالي\n` +
+      `رقم الأوردر: ${orderNumber}\n` +
+      `------------------------\n` +
+      `العميل: ${customerName} (${customerPhone})\n` +
+      `طريقة الدفع: ${paymentLabel}\n` +
+      `------------------------\n` +
       `${itemsText}` +
-      `------------------------
-` +
-      `الإجمالي: ${total} ج.م
-` +
-      `النقاط المكتسبة: ${pointsEarned}
-` +
-      `------------------------
-` +
+      `------------------------\n` +
+      `الإجمالي: ${total} ج.م\n` +
+      `النقاط المكتسبة: ${pointsEarned}\n` +
+      `------------------------\n` +
       `#نخساوينا_كوم_هيدماناخ`;
 
     window.open('https://wa.me/201094241177?text=' + encodeURIComponent(message), '_blank');
@@ -161,7 +150,7 @@ export default function Cashier2({
   }
 
   return (
-    <div className="min-h-screen bg-siwa-beige p-4" dir="rtl">
+    <div className="min-h-screen bg-siwa-beige p-8" dir="rtl">
       {/* شريط التبويبات: كاشير / مصاريف / خروج */}
       <div className="flex justify-center gap-2 mb-6 bg-white/70 p-1.5 rounded-2xl w-fit mx-auto shadow-sm">
         <button
@@ -189,12 +178,12 @@ export default function Cashier2({
           {/* المنتجات: أسماء فقط بدون أسعار */}
           <div className="lg:col-span-2">
             <h2 className="text-xs font-bold text-siwa-brown/60 mb-3">المنتجات</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
               {products.map(p => (
                 <button
                   key={p.id}
                   onClick={() => addToCart(p)}
-                  className="bg-white border border-siwa-brown/10 rounded-2xl p-4 text-sm font-bold text-siwa-brown hover:border-siwa-gold hover:shadow-md transition text-center"
+                  className="bg-white border border-siwa-brown/10 rounded-2xl p-6 text-sm font-bold text-siwa-brown hover:border-siwa-gold hover:shadow-md transition text-center"
                 >
                   {p.name}
                 </button>
@@ -203,7 +192,7 @@ export default function Cashier2({
           </div>
 
           {/* السلة والدفع */}
-          <div className="bg-white rounded-3xl p-5 shadow-lg space-y-4 h-fit">
+          <div className="bg-white rounded-3xl p-8 shadow-lg space-y-6 h-fit">
             <h2 className="text-xs font-black text-siwa-brown uppercase border-b border-siwa-brown/10 pb-2">السلة</h2>
 
             <div className="space-y-2 max-h-52 overflow-y-auto">
@@ -305,4 +294,4 @@ export default function Cashier2({
       )}
     </div>
   );
-                                 }
+}
