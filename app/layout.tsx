@@ -1,31 +1,15 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter, Cairo } from 'next/font/google';
+import { Cairo, Markazi_Text } from 'next/font/google';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' });
+const cairo = Cairo({ subsets: ['arabic', 'latin'], variable: '--font-cairo' });
+const markazi = Markazi_Text({ subsets: ['arabic', 'latin'], variable: '--font-markazi' });
 
+// ملاحظة: استبدل النطاق التالي بنطاقك الفعلي بعد النشر
 export const metadata: Metadata = {
   metadataBase: new URL('https://ibnshali.com'),
   title: 'ابن شالي',
-  description: 'متجر ابن شالي للمنتجات الطبيعية من سيوة.',
-  openGraph: {
-    title: 'ابن شالي',
-    description: 'متجر ابن شالي للمنتجات الطبيعية من سيوة.',
-    images: [
-      {
-        url: 'https://bolt.new/static/og_default.png',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    images: [
-      {
-        url: 'https://bolt.new/static/og_default.png',
-      },
-    ],
-  },
+  description: 'منتجات واحة سيوة الطبيعية الفاخرة.',
 };
 
 export default function RootLayout({
@@ -35,9 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={`${inter.variable} ${cairo.variable} font-sans`}>
-        {children}
-      </body>
+      <body className={`${cairo.variable} ${markazi.variable} font-sans`}>{children}</body>
     </html>
   );
 }
